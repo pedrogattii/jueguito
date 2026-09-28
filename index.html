@@ -7,7 +7,17 @@
     <title>Jueguito - Brainrot WorldBox</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="ui-container">
+      <h1>Brainrot WorldBox</h1>
+      <div class="controls">
+        <button id="spawn-skibidi" class="tool-btn active" data-tool="skibidi">Skibidi Toilet</button>
+        <button id="spawn-chad" class="tool-btn" data-tool="chad">GigaChad</button>
+        <button id="spawn-epstein" class="tool-btn" data-tool="epstein">Epstein Island Area</button>
+        <button id="power-cancel" class="tool-btn" data-tool="cancel">Cancel Culture (Erase)</button>
+        <button id="power-nuke" class="tool-btn" data-tool="nuke">Ratio Nuke</button>
+      </div>
+    </div>
+    <div id="game-container"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
