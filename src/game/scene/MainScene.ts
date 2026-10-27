@@ -8,8 +8,12 @@ const SAND = 1;
 const GRASS = 2;
 const MOUNTAIN = 3;
 const SNOW = 4;
+// Walking speed multiplier per biome id (water is impassable)
+const TERRAIN_SPEED = [0, 1, 1, 0.5, 0.35];
 // Share of the map for snow, mountain, grass and sand, from the centre outwards; the rest is water
 const BIOME_SHARES = [0.05, 0.15, 0.40, 0.08];
+
+const MAX_WALK_SPEED = 106; // fastest speed a random wander can pick (75 px/s on each axis)
 
 export class MainScene extends Phaser.Scene {
   private currentTool: string = 'inspect';
@@ -66,9 +70,6 @@ export class MainScene extends Phaser.Scene {
 
   update() {
     this.npcs.getChildren().forEach((npc: any) => {
-      const tx = Math.floor(npc.x / TILE_SIZE);
-      const ty = Math.floor(npc.y / TILE_SIZE);
-      
       let inIsland = false;
       for (const zone of this.epsteinZones) {
         if (Phaser.Geom.Rectangle.Contains(zone.getBounds(), npc.x, npc.y)) {
@@ -85,21 +86,37 @@ export class MainScene extends Phaser.Scene {
         if (!thrown) npc.clearTint();
         // Custom AI Logic
         npc.timeAlive = (npc.timeAlive || 0) + 1;
-        
-        // Random wandering
-        if (Math.random() < 0.02) {
-          npc.setVelocityX((Math.random() - 0.5) * 150);
-          npc.setVelocityY((Math.random() - 0.5) * 150);
+
+        // Physics has already moved the body this frame, so check there to never draw an NPC on water
+        const tile = this.tileAt(npc.body.center.x, npc.body.center.y);
+        if (tile === WATER) {
+          // NPCs can't swim: step back to the last dry spot and turn around
+          const dry = npc.getData('lastDry') as { x: number; y: number } | undefined;
+          const vx = npc.body.velocity.x;
+          const vy = npc.body.velocity.y;
+          if (dry) npc.body.reset(dry.x, dry.y);
+          npc.setVelocity(-vx, -vy);
+          return true;
         }
+        npc.setData('lastDry', { x: npc.body.center.x, y: npc.body.center.y });
+        const terrainSpeed = tile === undefined ? 1 : TERRAIN_SPEED[tile];
+        
+        // Random wandering, slower on rough terrain
+        if (Math.random() < 0.02) {
+          npc.setVelocityX((Math.random() - 0.5) * 150 * terrainSpeed);
+          npc.setVelocityY((Math.random() - 0.5) * 150 * terrainSpeed);
+        }
+
+        // Mountains and snow cap the walking speed, except while a tornado is throwing the NPC
+        const speed = npc.body.velocity.length();
+        const maxSpeed = MAX_WALK_SPEED * terrainSpeed;
+        if (!thrown && terrainSpeed < 1 && speed > maxSpeed) npc.body.velocity.scale(maxSpeed / speed);
 
         // Build a brainrot settlement if they are on grass/sand and lived long enough
         if (npc.timeAlive > 300 && Math.random() < 0.005) {
-          if (tx >= 0 && tx < this.widthTiles && ty >= 0 && ty < this.heightTiles) {
-            const tileType = this.mapData[ty][tx];
-            if (tileType === 2 || tileType === 1) { // Grass or sand
-              this.buildSettlement(npc.x, npc.y, npc.getData('type'));
-              npc.timeAlive = 0; // reset
-            }
+          if (tile === GRASS || tile === SAND) {
+            this.buildSettlement(npc.x, npc.y, npc.getData('type'));
+            npc.timeAlive = 0; // reset
           }
         }
       }
@@ -109,6 +126,11 @@ export class MainScene extends Phaser.Scene {
 
   public setCurrentTool(tool: string) {
     this.currentTool = tool;
+  }
+
+  // Biome under a world position, or undefined outside the map
+  private tileAt(x: number, y: number): number | undefined {
+    return this.mapData[Math.floor(y / TILE_SIZE)]?.[Math.floor(x / TILE_SIZE)];
   }
 
   private generateTerrain() {
@@ -208,6 +230,13 @@ export class MainScene extends Phaser.Scene {
   }
 
   private spawnNPC(x: number, y: number, type: string) {
+    if (this.tileAt(x, y) === WATER) {
+      // Can't spawn in the sea: show a splash instead
+      const splash = this.add.circle(x, y, 10, 0x66ccff, 0.8);
+      this.tweens.add({ targets: splash, scale: 3, alpha: 0, duration: 400, onComplete: () => splash.destroy() });
+      return;
+    }
+
     const size = type === 'chad' ? 40 : 32;
     const color = type === 'chad' ? 0x222222 : 0xeeeeee;
     

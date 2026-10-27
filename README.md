@@ -5,6 +5,7 @@ Un juego estilo "God Game" similar a WorldBox, pero con personajes y mecánicas 
 ## 🧠 Características Premium
 - **Terreno Procedural Avanzado:** Generación de mapas de 60x60 tiles con múltiples biomas (Océano, Arena, Césped, Montaña y Nieve) mediante algoritmos de autómatas celulares y ruido. Cada bioma ocupa siempre la misma proporción del mapa, formando una isla rodeada de océano.
 - **Inteligencia Artificial de NPCs:** Los personajes no solo rebotan, sino que si sobreviven lo suficiente en un bioma habitable, fundarán asentamientos (*5G Towers* y *Chad Gyms*).
+- **El terreno importa:** Los NPCs no saben nadar (no pueden entrar ni aparecer en el océano) y caminan más lento en la montaña (50%) y en la nieve (35%).
 - **Desastres Naturales:**
   - **Tornado:** Un huracán que se mueve erráticamente, atrapando y arrojando NPCs por el aire.
   - **Meteorito:** Cae desde el cielo creando una enorme explosión con *screen shake*, aniquilando NPCs y destruyendo edificios.
