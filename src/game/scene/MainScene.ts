@@ -71,7 +71,9 @@ export class MainScene extends Phaser.Scene {
         npc.setVelocity((Math.random() - 0.5) * 800, (Math.random() - 0.5) * 800);
         npc.setTint(0xff0000);
       } else {
-        npc.clearTint();
+        // Keep the tornado tint visible until its effect expires
+        const thrown = (npc.getData('tornadoUntil') ?? 0) >= this.time.now;
+        if (!thrown) npc.clearTint();
         // Custom AI Logic
         npc.timeAlive = (npc.timeAlive || 0) + 1;
         
@@ -244,6 +246,7 @@ export class MainScene extends Phaser.Scene {
               (tornado.y - npc.y) * 5 + (Math.random() - 0.5) * 500
             );
             npc.setTint(0xaaaaaa);
+            npc.setData('tornadoUntil', this.time.now + 300);
           }
           return true;
         });
