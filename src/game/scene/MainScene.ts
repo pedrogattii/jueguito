@@ -221,9 +221,11 @@ export class MainScene extends Phaser.Scene {
     }
 
     const b = this.buildings.create(x, y, 'building' + type) as Phaser.Physics.Arcade.Sprite;
-    this.add.text(x, y - 40, type === 'chad' ? 'Chad Gym' : '5G Tower', { 
-      fontSize: '14px', fontStyle: 'bold', stroke: '#000', strokeThickness: 3 
+    const label = this.add.text(x, y - 40, type === 'chad' ? 'Chad Gym' : '5G Tower', {
+      fontSize: '14px', fontStyle: 'bold', stroke: '#000', strokeThickness: 3
     }).setOrigin(0.5);
+    // Remove the label together with its building
+    b.once('destroy', () => label.destroy());
   }
 
   private spawnTornado(x: number, y: number) {
