@@ -318,8 +318,10 @@ export class MainScene extends Phaser.Scene {
     this.epsteinZones.forEach(z => z.destroy());
     this.epsteinZones = [];
     
+    // Stop running effects (tornadoes, falling meteors) and remove their shapes and craters
+    this.tweens.killAll();
     this.children.list
-      .filter(child => child instanceof Phaser.GameObjects.Text)
-      .forEach(text => text.destroy());
+      .filter(child => child instanceof Phaser.GameObjects.Text || child instanceof Phaser.GameObjects.Arc)
+      .forEach(child => child.destroy());
   }
 }
