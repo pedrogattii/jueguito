@@ -2,6 +2,15 @@ import Phaser from 'phaser';
 
 const TILE_SIZE = 64;
 
+// Biome ids stored in mapData
+const WATER = 0;
+const SAND = 1;
+const GRASS = 2;
+const MOUNTAIN = 3;
+const SNOW = 4;
+// Share of the map for snow, mountain, grass and sand, from the centre outwards; the rest is water
+const BIOME_SHARES = [0.05, 0.15, 0.40, 0.08];
+
 export class MainScene extends Phaser.Scene {
   private currentTool: string = 'inspect';
   private npcs!: Phaser.Physics.Arcade.Group;
@@ -139,16 +148,24 @@ export class MainScene extends Phaser.Scene {
       heightMap = newMap;
     }
 
-    // Convert height to Biomes
+    // Convert height to biomes by percentile, so each biome always covers the same share of the map
+    const sorted = heightMap.flat().sort((a, b) => a - b);
+    const limits: number[] = [];
+    let share = 0;
+    for (const biomeShare of BIOME_SHARES) {
+      share += biomeShare;
+      limits.push(sorted[Math.min(sorted.length - 1, Math.floor(share * sorted.length))]);
+    }
+    const [snowMax, mountainMax, grassMax, sandMax] = limits;
     for (let y = 0; y < this.heightTiles; y++) {
       let row = [];
       for (let x = 0; x < this.widthTiles; x++) {
         const h = heightMap[y][x];
-        if (h > 65) row.push(0); // Deep Water
-        else if (h > 58) row.push(1); // Sand
-        else if (h > 40) row.push(2); // Grass
-        else if (h > 25) row.push(3); // Mountain
-        else row.push(4); // Snow
+        if (h < snowMax) row.push(SNOW);
+        else if (h < mountainMax) row.push(MOUNTAIN);
+        else if (h < grassMax) row.push(GRASS);
+        else if (h < sandMax) row.push(SAND);
+        else row.push(WATER);
       }
       this.mapData.push(row);
     }
