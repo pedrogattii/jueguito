@@ -11,10 +11,10 @@ Un juego estilo "God Game" similar a WorldBox, pero con personajes y mecánicas 
   - **Meteorito:** Cae desde el cielo creando una enorme explosión con *screen shake*, aniquilando NPCs y destruyendo edificios.
 - **Epstein Island:** Crea zonas de locura.
 - **Cancel Culture & Ratio Nuke:** Herramientas de destrucción manual masiva.
-- **Interfaz UI:** UI Glassmorphism fluida creada con React y Tailwind CSS, superpuesta a un motor de físicas potente como Phaser 3.
+- **Interfaz UI:** UI Glassmorphism fluida creada con React y Tailwind CSS, superpuesta a un motor de físicas potente como Phaser 4.
 
 ## 🚀 Instalación y Desarrollo
-Este proyecto utiliza Vite + React + TailwindCSS + Phaser 3.
+Este proyecto utiliza Vite + React + TailwindCSS + Phaser 4.
 
 ```bash
 # Instalar dependencias
