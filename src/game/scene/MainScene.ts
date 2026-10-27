@@ -13,7 +13,14 @@ const TERRAIN_SPEED = [0, 1, 1, 0.5, 0.35];
 // Share of the map for snow, mountain, grass and sand, from the centre outwards; the rest is water
 const BIOME_SHARES = [0.05, 0.15, 0.40, 0.08];
 
+// NPC behaviour is expressed per second so it doesn't depend on the frame rate
+const WANDER_PER_SECOND = 1.2;
+const BUILD_PER_SECOND = 0.3;
+const BUILD_MIN_AGE_MS = 5000;
 const MAX_WALK_SPEED = 106; // fastest speed a random wander can pick (75 px/s on each axis)
+
+// Probability that something happening `ratePerSecond` times per second happens within `dt` seconds
+const chancePerFrame = (ratePerSecond: number, dt: number) => 1 - Math.exp(-ratePerSecond * dt);
 
 export class MainScene extends Phaser.Scene {
   private currentTool: string = 'inspect';
@@ -68,7 +75,8 @@ export class MainScene extends Phaser.Scene {
     });
   }
 
-  update() {
+  update(_time: number, delta: number) {
+    const dt = delta / 1000;
     this.npcs.getChildren().forEach((npc: any) => {
       let inIsland = false;
       for (const zone of this.epsteinZones) {
@@ -85,7 +93,7 @@ export class MainScene extends Phaser.Scene {
         const thrown = (npc.getData('tornadoUntil') ?? 0) >= this.time.now;
         if (!thrown) npc.clearTint();
         // Custom AI Logic
-        npc.timeAlive = (npc.timeAlive || 0) + 1;
+        npc.timeAlive = (npc.timeAlive || 0) + delta; // milliseconds
 
         // Physics has already moved the body this frame, so check there to never draw an NPC on water
         const tile = this.tileAt(npc.body.center.x, npc.body.center.y);
@@ -102,7 +110,7 @@ export class MainScene extends Phaser.Scene {
         const terrainSpeed = tile === undefined ? 1 : TERRAIN_SPEED[tile];
         
         // Random wandering, slower on rough terrain
-        if (Math.random() < 0.02) {
+        if (Math.random() < chancePerFrame(WANDER_PER_SECOND, dt)) {
           npc.setVelocityX((Math.random() - 0.5) * 150 * terrainSpeed);
           npc.setVelocityY((Math.random() - 0.5) * 150 * terrainSpeed);
         }
@@ -113,7 +121,7 @@ export class MainScene extends Phaser.Scene {
         if (!thrown && terrainSpeed < 1 && speed > maxSpeed) npc.body.velocity.scale(maxSpeed / speed);
 
         // Build a brainrot settlement if they are on grass/sand and lived long enough
-        if (npc.timeAlive > 300 && Math.random() < 0.005) {
+        if (npc.timeAlive > BUILD_MIN_AGE_MS && Math.random() < chancePerFrame(BUILD_PER_SECOND, dt)) {
           if (tile === GRASS || tile === SAND) {
             this.buildSettlement(npc.x, npc.y, npc.getData('type'));
             npc.timeAlive = 0; // reset
