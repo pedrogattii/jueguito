@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { PhaserGame } from './game/PhaserGame';
-import { MousePointer2, Skull, Bomb, ShieldAlert, User, Zap, Wind, Flame } from 'lucide-react';
+import { MousePointer2, Skull, Bomb, ShieldAlert, User, Wind, Flame } from 'lucide-react';
 
 function App() {
   const [currentTool, setCurrentTool] = useState('inspect');

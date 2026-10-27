@@ -49,7 +49,7 @@ export class MainScene extends Phaser.Scene {
       this.cameras.main.scrollY -= (pointer.y - pointer.prevPosition.y) / this.cameras.main.zoom;
     });
 
-    this.input.on('wheel', (pointer: any, gameObjects: any, deltaX: number, deltaY: number, deltaZ: number) => {
+    this.input.on('wheel', (_pointer: any, _gameObjects: any, _deltaX: number, deltaY: number) => {
       const newZoom = this.cameras.main.zoom - deltaY * 0.001;
       this.cameras.main.setZoom(Phaser.Math.Clamp(newZoom, 0.2, 2));
     });
