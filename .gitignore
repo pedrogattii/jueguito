@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Reference material for reverse engineering (not part of the game)
+sandbox/
