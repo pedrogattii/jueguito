@@ -56,7 +56,7 @@ export class MainScene extends Phaser.Scene {
   }
 
   update() {
-    this.npcs.children.iterate((npc: any) => {
+    this.npcs.getChildren().forEach((npc: any) => {
       const tx = Math.floor(npc.x / TILE_SIZE);
       const ty = Math.floor(npc.y / TILE_SIZE);
       
@@ -235,7 +235,7 @@ export class MainScene extends Phaser.Scene {
       y: y + (Math.random() - 0.5) * 500,
       duration: 3000,
       onUpdate: () => {
-        this.npcs.children.iterate((npc: any) => {
+        this.npcs.getChildren().forEach((npc: any) => {
           if (Phaser.Math.Distance.Between(tornado.x, tornado.y, npc.x, npc.y) <= 100) {
             npc.setVelocity(
               (tornado.x - npc.x) * 5 + (Math.random() - 0.5) * 500,
@@ -267,14 +267,14 @@ export class MainScene extends Phaser.Scene {
         this.tweens.add({ targets: crater, alpha: 0.3, duration: 2000 });
 
         // Kill everything in radius
-        this.npcs.children.iterate((npc: any) => {
+        this.npcs.getChildren().forEach((npc: any) => {
           if (Phaser.Math.Distance.Between(x, y, npc.x, npc.y) <= 150) {
             npc.destroy();
           }
           return true;
         });
         
-        this.buildings.children.iterate((b: any) => {
+        this.buildings.getChildren().forEach((b: any) => {
           if (Phaser.Math.Distance.Between(x, y, b.x, b.y) <= 150) {
             b.destroy();
           }
@@ -299,7 +299,7 @@ export class MainScene extends Phaser.Scene {
     const circle = this.add.circle(x, y, cancelRadius, 0xff0000, 0.6);
     this.tweens.add({ targets: circle, scale: 1.5, alpha: 0, duration: 600, onComplete: () => circle.destroy() });
 
-    this.npcs.children.iterate((npc: any) => {
+    this.npcs.getChildren().forEach((npc: any) => {
       if (Phaser.Math.Distance.Between(x, y, npc.x, npc.y) <= cancelRadius) npc.destroy();
       return true;
     });
