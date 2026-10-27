@@ -120,15 +120,20 @@ export class MainScene extends Phaser.Scene {
     // Smooth (Cellular Automata) multiple passes
     for (let i = 0; i < 4; i++) {
       const newMap = JSON.parse(JSON.stringify(heightMap));
-      for (let y = 1; y < this.heightTiles - 1; y++) {
-        for (let x = 1; x < this.widthTiles - 1; x++) {
+      for (let y = 0; y < this.heightTiles; y++) {
+        for (let x = 0; x < this.widthTiles; x++) {
+          // Average only the neighbours inside the map so the border is smoothed too
           let sum = 0;
+          let count = 0;
           for (let dy = -1; dy <= 1; dy++) {
             for (let dx = -1; dx <= 1; dx++) {
-              sum += heightMap[y + dy][x + dx];
+              const row = heightMap[y + dy];
+              if (row === undefined || x + dx < 0 || x + dx >= this.widthTiles) continue;
+              sum += row[x + dx];
+              count++;
             }
           }
-          newMap[y][x] = sum / 9;
+          newMap[y][x] = sum / count;
         }
       }
       heightMap = newMap;
